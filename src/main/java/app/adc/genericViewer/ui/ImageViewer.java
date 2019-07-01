@@ -1,14 +1,13 @@
 package app.adc.genericViewer.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Canvas;
 import java.awt.Graphics;
-import java.io.IOException;
-import java.net.MalformedURLException;
+import java.awt.Image;
 import java.net.URI;
 
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
+import javax.swing.JScrollPane;
 
 public class ImageViewer extends AbstractViewer {
 	
@@ -22,21 +21,14 @@ public class ImageViewer extends AbstractViewer {
 	}
 	
 	private void init() {
-		add(displayCanvas = new JComponent() {
+		displayCanvas = new JComponent() {
 			@Override
 			public void paint(Graphics g) {
 				g.clearRect(0, 0, this.getWidth(), this.getHeight());
-				try {
-					g.drawImage(ImageIO.read(sourceImage.toURL()), 0,0, null);
-				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				g.drawImage(getImage(), 0,0, null);
 			}
-		}, BorderLayout.CENTER);
+		};
+		add(new JScrollPane(displayCanvas), BorderLayout.CENTER);
 		
 		try {
 			loadImage();
@@ -44,6 +36,20 @@ public class ImageViewer extends AbstractViewer {
 			// TODO Auto-generated catch block
 			a_th.printStackTrace();
 		}
+	}
+	
+	private Image getImage()  {
+		Image img = null;
+		try {
+			img = ImageIO.read(sourceImage.toURL());
+			if(img.getWidth(null) > displayCanvas.getWidth() && img.getWidth(null) > displayCanvas.getWidth()) {
+				img = img.getScaledInstance(displayCanvas.getWidth(), displayCanvas.getHeight(), Image.SCALE_FAST);
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		return img;
 	}
 	
 	private void loadImage() throws Throwable {
@@ -66,7 +72,7 @@ public class ImageViewer extends AbstractViewer {
 				System.out.println("ImageViewer.loadImage().new Runnable() {...}.run(end while)");
 				try {
 					//displayCanvas.createBufferStrategy(3);
-					g.drawImage(ImageIO.read(sourceImage.toURL()), 0,0, null);
+					g.drawImage(getImage(), 0,0, null);
 				} catch (Throwable a_th) {
 					// TODO Auto-generated catch block
 					a_th.printStackTrace();
