@@ -7,12 +7,17 @@ import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
 import javax.swing.JDesktopPane;
+import javax.swing.JInternalFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -23,37 +28,113 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 public class MainContainer extends JPanel {
+	
+	private static int FRAME_OFFSET = 20;
 
 	private JDesktopPane	desktopPane			= null;
 	private JMenuBar		menuBar				= null;
 	private JMenu			fileMenu			= null;
 	private JMenuItem		openMenItem			= null;
 	private JMenu			lafMenu				= null;
+	private JMenu			window				= null;
+	private JMenuItem		tileWindows			= null;
+	private JMenuItem		cascadeWindows		= null;
 
-	private ButtonGroup		lafMenuGroup		= new ButtonGroup();
+	private ButtonGroup		lafMenuGroup		= null;
+	private ButtonGroup		windowMenuGroup		= null;
 
 	private static String	currentLookAndFeel	= null;
+	
+	private static MainContainer staticInstance = null;
+	
+	private Map<JRadioButtonMenuItem, JInternalFrame> frameMenu = null;
 
 	public MainContainer() {
+		if(staticInstance != null) {
+			throw new RuntimeException("Double initiation");
+		}else {
+			staticInstance = this;
+		}
 		init();
 	}
 
 	public JDesktopPane getDesktopPane() {
 		return desktopPane;
 	}
+	
+	public static MainContainer getMainContainer() {
+		return staticInstance;
+	}
+	
+	public void internalFrameActivated(JInternalFrame internalFrame) {
+		JMenuItem mi = null;
+		for(Entry<JRadioButtonMenuItem, JInternalFrame> entry : frameMenu.entrySet()) {
+			if(entry.getValue().equals(internalFrame)) {
+				mi = entry.getKey();
+				mi.setSelected(true);
+			}
+		}
+	}
+	
+	public void addInternalFrame(final JInternalFrame internalFrame) {
+		if(frameMenu.isEmpty()) {
+			window.addSeparator();
+		}
+		JRadioButtonMenuItem mi = new JRadioButtonMenuItem(internalFrame.getTitle());
+		windowMenuGroup.add(mi);
+		window.add(mi);
+		frameMenu.put(mi, internalFrame);
+		mi.setSelected(true);
+		mi.addActionListener(new ActionListener() {
+			
+			public void actionPerformed(ActionEvent e) {
+				desktopPane.getDesktopManager().activateFrame(internalFrame);				
+			}
+		});
+	}
+	
+	public void removeInternalFrame(JInternalFrame internalFrame) {
+		JMenuItem mi = null;
+		for(Entry<JRadioButtonMenuItem, JInternalFrame> entry : frameMenu.entrySet()) {
+			if(entry.getValue().equals(internalFrame)) {
+				mi = entry.getKey();
+			}
+		}
+		
+		if(mi != null) {
+			frameMenu.remove(mi);
+			window.remove(mi);
+			windowMenuGroup.remove(mi);
+		}
+		
+		if(frameMenu.isEmpty()) {
+			window.remove(2);
+		}
+	}
 
 	private void init() {
-		menuBar		= new JMenuBar();
-		fileMenu	= new JMenu("File");
+		frameMenu = new HashMap<JRadioButtonMenuItem, JInternalFrame>();
+		
+		lafMenuGroup	= new ButtonGroup();
+		windowMenuGroup = new ButtonGroup();
+
+		menuBar			= new JMenuBar();
+		fileMenu		= new JMenu("File");
 		fileMenu.setMnemonic('F');
 
 		openMenItem = new JMenuItem("Open");
 		openMenItem.addActionListener(new MenuEventListener(this));
 		fileMenu.add(openMenItem);
-		lafMenu = new JMenu("Look & Feel");
+		lafMenu	= new JMenu("Look & Feel");
+		window	= new JMenu("Window");
 
 		menuBar.add(fileMenu);
 		menuBar.add(lafMenu);
+		menuBar.add(window);
+
+		window.add(cascadeWindows = new JMenuItem("Cascade"));
+		window.add(tileWindows = new JMenuItem("Tile"));
+		// window.add(new JMenuItem("-"));
 
 		JMenuItem					mi;
 
@@ -66,7 +147,6 @@ public class MainContainer extends JPanel {
 			mi = createLafMenuItem(lafMenu, lafInfo[counter]);
 			mi.setSelected(selected);
 		}
-		
 
 		setLayout(new BorderLayout());
 		desktopPane = new JDesktopPane();
@@ -98,6 +178,7 @@ public class MainContainer extends JPanel {
 				a_dtde.dropComplete(true);
 			}
 		});
+		
 	}
 
 	public JMenuItem createLafMenuItem(JMenu menu, UIManager.LookAndFeelInfo lafInfo) {

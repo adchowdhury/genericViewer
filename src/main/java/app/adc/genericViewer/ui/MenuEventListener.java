@@ -9,6 +9,8 @@ import java.net.URI;
 import javax.swing.JFileChooser;
 import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
+import javax.swing.event.InternalFrameEvent;
+import javax.swing.event.InternalFrameListener;
 
 public class MenuEventListener implements ActionListener{
 	
@@ -37,6 +39,9 @@ public class MenuEventListener implements ActionListener{
 		}
 		
 		JInternalFrame frm = new JInternalFrame(new File(source).getName());
+		frm.setName(frm.getTitle());
+		frm.setToolTipText(frm.getTitle());
+		
 		frm.add(viewer);
 		frm.setLocation(0, 0);
 		frm.setSize(800, 600);
@@ -47,6 +52,43 @@ public class MenuEventListener implements ActionListener{
 		
 		parentComponent.getDesktopPane().add(frm);
 		frm.setVisible(true);
+		parentComponent.addInternalFrame(frm);
+		
+		frm.addInternalFrameListener(new InternalFrameListener() {
+			
+			public void internalFrameOpened(InternalFrameEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			public void internalFrameIconified(InternalFrameEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			public void internalFrameDeiconified(InternalFrameEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			public void internalFrameDeactivated(InternalFrameEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			public void internalFrameClosing(InternalFrameEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			public void internalFrameClosed(InternalFrameEvent a_ifEvent) {
+				parentComponent.removeInternalFrame(a_ifEvent.getInternalFrame());				
+			}
+			
+			public void internalFrameActivated(InternalFrameEvent a_ifEvent) {
+				parentComponent.internalFrameActivated(a_ifEvent.getInternalFrame());				
+			}
+		});
 		
 		try {
 	        frm.setSelected(true);
