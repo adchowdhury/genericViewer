@@ -28,6 +28,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
+//https://stackoverflow.com/questions/5158961/unzip-into-treemap-in-java
+
 public class ZipViewer extends AbstractViewer {
 
 	private URI					sourceFile	= null;
@@ -103,7 +105,7 @@ public class ZipViewer extends AbstractViewer {
 					}
 		        	
                     
-		        	MenuEventListener.openResource(f.toURI());
+		        	MenuEventListener.openResource(ViewerFactory.getViewer(f.toURI()), f.getName());
 		        }
 		    }
 		});
@@ -117,10 +119,13 @@ public class ZipViewer extends AbstractViewer {
 		while (e.hasMoreElements()) {
 
 			ZipEntry entry = e.nextElement();
-			filesList.add(entry);
+			
+			
 			// get the name of the entry
 			String entryName = entry.getName();
 			System.out.println("ZIP Entry: " + entryName);
+			
+			filesList.add(entry);
 
 		}
 		tblModel.fireTableDataChanged();
@@ -155,6 +160,8 @@ public class ZipViewer extends AbstractViewer {
 	
 	public static String getName(ZipEntry zipEntry) {
 		String name = zipEntry.getName();
+		//return name;
+		
 		if(zipEntry.isDirectory()) {
 			return name.substring(name.substring(0, name.lastIndexOf('/')).lastIndexOf('/') + 1, name.length() - 1);
 		}else {

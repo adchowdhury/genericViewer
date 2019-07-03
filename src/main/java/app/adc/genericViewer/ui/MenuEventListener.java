@@ -18,22 +18,32 @@ public final class MenuEventListener {
 	public static void openClicked(ActionEvent a_actionEvent) {
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-		fileChooser.showOpenDialog((Component)MainContainer.getMainContainer());
+		int chooserReturn = fileChooser.showOpenDialog((Component)MainContainer.getMainContainer());
+		
+		if(chooserReturn == JFileChooser.CANCEL_OPTION) {
+			return;
+		}
 		
 		File selectedFile = fileChooser.getSelectedFile();
 		//selectedFile.
-		openResource(selectedFile.toURI());
+		if(selectedFile == null) {
+			return;
+		}
 		
-	}
-	
-	public static void openResource(URI source) {
-		AbstractViewer viewer = ViewerFactory.getViewer(source);
+		AbstractViewer viewer = ViewerFactory.getViewer(selectedFile.toURI());
 		if(viewer == null) {
 			JOptionPane.showMessageDialog(null, "File type not supported yet");
 			return;
 		}
+		openResource(viewer, selectedFile.getName());
+	}
+	
+	public static void openResource(AbstractViewer viewer, String displayName) {
+		if(viewer == null || displayName == null) {
+			return;
+		}
 		
-		JInternalFrame frm = new JInternalFrame(new File(source).getName());
+		JInternalFrame frm = new JInternalFrame(displayName);
 		frm.setName(frm.getTitle());
 		frm.setToolTipText(frm.getTitle());
 		

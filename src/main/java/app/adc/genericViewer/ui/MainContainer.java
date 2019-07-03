@@ -1,6 +1,7 @@
 package app.adc.genericViewer.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Frame;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
@@ -17,6 +18,7 @@ import java.util.Map.Entry;
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
 import javax.swing.JDesktopPane;
+import javax.swing.JDialog;
 import javax.swing.JInternalFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -28,31 +30,32 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 public class MainContainer extends JPanel {
-	
-	private static int FRAME_OFFSET = 20;
 
-	private JDesktopPane	desktopPane			= null;
-	private JMenuBar		menuBar				= null;
-	private JMenu			fileMenu			= null;
-	private JMenuItem		openMenItem			= null;
-	private JMenu			lafMenu				= null;
-	private JMenu			window				= null;
-	private JMenuItem		tileWindows			= null;
-	private JMenuItem		cascadeWindows		= null;
+	private static int									FRAME_OFFSET		= 20;
 
-	private ButtonGroup		lafMenuGroup		= null;
-	private ButtonGroup		windowMenuGroup		= null;
+	private JDesktopPane								desktopPane			= null;
+	private JMenuBar									menuBar				= null;
+	private JMenu										fileMenu			= null;
+	private JMenuItem									openMenItem			= null;
+	private JMenuItem									openRemoteMenItem	= null;
+	private JMenu										lafMenu				= null;
+	private JMenu										window				= null;
+	private JMenuItem									tileWindows			= null;
+	private JMenuItem									cascadeWindows		= null;
 
-	private static String	currentLookAndFeel	= null;
-	
-	private static MainContainer staticInstance = null;
-	
-	private Map<JRadioButtonMenuItem, JInternalFrame> frameMenu = null;
+	private ButtonGroup									lafMenuGroup		= null;
+	private ButtonGroup									windowMenuGroup		= null;
+
+	private static String								currentLookAndFeel	= null;
+
+	private static MainContainer						staticInstance		= null;
+
+	private Map<JRadioButtonMenuItem, JInternalFrame>	frameMenu			= null;
 
 	public MainContainer() {
-		if(staticInstance != null) {
+		if (staticInstance != null) {
 			throw new RuntimeException("Double initiation");
-		}else {
+		} else {
 			staticInstance = this;
 		}
 		init();
@@ -61,23 +64,23 @@ public class MainContainer extends JPanel {
 	public JDesktopPane getDesktopPane() {
 		return desktopPane;
 	}
-	
+
 	public static MainContainer getMainContainer() {
 		return staticInstance;
 	}
-	
+
 	public void internalFrameActivated(JInternalFrame internalFrame) {
 		JMenuItem mi = null;
-		for(Entry<JRadioButtonMenuItem, JInternalFrame> entry : frameMenu.entrySet()) {
-			if(entry.getValue().equals(internalFrame)) {
+		for (Entry<JRadioButtonMenuItem, JInternalFrame> entry : frameMenu.entrySet()) {
+			if (entry.getValue().equals(internalFrame)) {
 				mi = entry.getKey();
 				mi.setSelected(true);
 			}
 		}
 	}
-	
+
 	public void addInternalFrame(final JInternalFrame internalFrame) {
-		if(frameMenu.isEmpty()) {
+		if (frameMenu.isEmpty()) {
 			window.addSeparator();
 		}
 		JRadioButtonMenuItem mi = new JRadioButtonMenuItem(internalFrame.getTitle());
@@ -86,37 +89,37 @@ public class MainContainer extends JPanel {
 		frameMenu.put(mi, internalFrame);
 		mi.setSelected(true);
 		mi.addActionListener(new ActionListener() {
-			
+
 			public void actionPerformed(ActionEvent e) {
-				desktopPane.getDesktopManager().activateFrame(internalFrame);				
+				desktopPane.getDesktopManager().activateFrame(internalFrame);
 			}
 		});
 	}
-	
+
 	public void removeInternalFrame(JInternalFrame internalFrame) {
 		JMenuItem mi = null;
-		for(Entry<JRadioButtonMenuItem, JInternalFrame> entry : frameMenu.entrySet()) {
-			if(entry.getValue().equals(internalFrame)) {
+		for (Entry<JRadioButtonMenuItem, JInternalFrame> entry : frameMenu.entrySet()) {
+			if (entry.getValue().equals(internalFrame)) {
 				mi = entry.getKey();
 			}
 		}
-		
-		if(mi != null) {
+
+		if (mi != null) {
 			frameMenu.remove(mi);
 			window.remove(mi);
 			windowMenuGroup.remove(mi);
 		}
-		
-		if(frameMenu.isEmpty()) {
+
+		if (frameMenu.isEmpty()) {
 			window.remove(2);
 		}
 	}
 
 	private void init() {
-		frameMenu = new HashMap<JRadioButtonMenuItem, JInternalFrame>();
-		
+		frameMenu		= new HashMap<JRadioButtonMenuItem, JInternalFrame>();
+
 		lafMenuGroup	= new ButtonGroup();
-		windowMenuGroup = new ButtonGroup();
+		windowMenuGroup	= new ButtonGroup();
 
 		menuBar			= new JMenuBar();
 		fileMenu		= new JMenu("File");
@@ -125,10 +128,25 @@ public class MainContainer extends JPanel {
 		openMenItem = new JMenuItem("Open");
 		openMenItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent a_event) {
-				MenuEventListener.openClicked(a_event);				
+				MenuEventListener.openClicked(a_event);
 			}
 		});
+		
+		openRemoteMenItem = new JMenuItem("Open Remote");
+		openRemoteMenItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent a_event) {
+				JDialog configDialog = new JDialog(Frame.getFrames()[0], "Remote connection");
+				configDialog.add(new RemoteOptions());
+				configDialog.setSize(800, 600);
+				configDialog.setModal(true);
+				configDialog.setResizable(false);
+				configDialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(MainContainer.this));
+				configDialog.setVisible(true);
+			}
+		});
+		
 		fileMenu.add(openMenItem);
+		fileMenu.add(openRemoteMenItem);
 		lafMenu	= new JMenu("Look & Feel");
 		window	= new JMenu("Window");
 
@@ -171,7 +189,7 @@ public class MainContainer extends JPanel {
 						File[] filesArray = (File[]) ((List<File>) t.getTransferData(df)).toArray();
 						for (File f : filesArray) {
 							System.out.println(f.getAbsolutePath());
-							MenuEventListener.openResource(f.toURI());
+							MenuEventListener.openResource(ViewerFactory.getViewer(f.toURI()), f.getName());
 						}
 					} catch (Throwable a_th) {
 						// TODO: handle exception
@@ -182,7 +200,7 @@ public class MainContainer extends JPanel {
 				a_dtde.dropComplete(true);
 			}
 		});
-		
+
 	}
 
 	public JMenuItem createLafMenuItem(JMenu menu, UIManager.LookAndFeelInfo lafInfo) {

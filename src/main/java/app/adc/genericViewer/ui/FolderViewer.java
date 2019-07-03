@@ -94,7 +94,7 @@ public class FolderViewer extends AbstractViewer {
 		        int row = table.rowAtPoint(point);
 		        if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
 		        	File f = displayFiles.get(row);
-		        	MenuEventListener.openResource(f.toURI());
+		        	MenuEventListener.openResource(ViewerFactory.getViewer(f.toURI()), f.getName());
 		        }
 		    }
 		});
