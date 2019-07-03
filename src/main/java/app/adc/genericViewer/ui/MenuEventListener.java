@@ -2,7 +2,6 @@ package app.adc.genericViewer.ui;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.net.URI;
 
@@ -12,18 +11,14 @@ import javax.swing.JOptionPane;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
-public class MenuEventListener implements ActionListener{
+public final class MenuEventListener {
 	
-	private static MainContainer parentComponent = null;
 	
-	public MenuEventListener(MainContainer a_parentComponent) {
-		parentComponent = a_parentComponent;
-	}
-
-	public void actionPerformed(ActionEvent a_actionEvent) {
+	
+	public static void openClicked(ActionEvent a_actionEvent) {
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-		fileChooser.showOpenDialog((Component)parentComponent);
+		fileChooser.showOpenDialog((Component)MainContainer.getMainContainer());
 		
 		File selectedFile = fileChooser.getSelectedFile();
 		//selectedFile.
@@ -50,9 +45,9 @@ public class MenuEventListener implements ActionListener{
 		frm.setIconifiable(true);
 		frm.setMaximizable(true);
 		
-		parentComponent.getDesktopPane().add(frm);
+		MainContainer.getMainContainer().getDesktopPane().add(frm);
 		frm.setVisible(true);
-		parentComponent.addInternalFrame(frm);
+		MainContainer.getMainContainer().addInternalFrame(frm);
 		
 		frm.addInternalFrameListener(new InternalFrameListener() {
 			
@@ -82,17 +77,19 @@ public class MenuEventListener implements ActionListener{
 			}
 			
 			public void internalFrameClosed(InternalFrameEvent a_ifEvent) {
-				parentComponent.removeInternalFrame(a_ifEvent.getInternalFrame());				
+				MainContainer.getMainContainer().removeInternalFrame(a_ifEvent.getInternalFrame());				
 			}
 			
 			public void internalFrameActivated(InternalFrameEvent a_ifEvent) {
-				parentComponent.internalFrameActivated(a_ifEvent.getInternalFrame());				
+				MainContainer.getMainContainer().internalFrameActivated(a_ifEvent.getInternalFrame());				
 			}
 		});
 		
 		try {
 	        frm.setSelected(true);
-	    } catch (java.beans.PropertyVetoException e) {}
+	    } catch (java.beans.PropertyVetoException a_excp) {
+	    	a_excp.printStackTrace();
+	    }
 	}
 
 }

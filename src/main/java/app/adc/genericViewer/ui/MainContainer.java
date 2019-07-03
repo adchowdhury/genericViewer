@@ -123,7 +123,11 @@ public class MainContainer extends JPanel {
 		fileMenu.setMnemonic('F');
 
 		openMenItem = new JMenuItem("Open");
-		openMenItem.addActionListener(new MenuEventListener(this));
+		openMenItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent a_event) {
+				MenuEventListener.openClicked(a_event);				
+			}
+		});
 		fileMenu.add(openMenItem);
 		lafMenu	= new JMenu("Look & Feel");
 		window	= new JMenu("Window");
