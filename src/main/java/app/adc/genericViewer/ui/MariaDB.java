@@ -1,5 +1,7 @@
 package app.adc.genericViewer.ui;
 
+import static app.adc.genericViewer.ui.IConstant.MariaDBConstants;
+
 import java.awt.GridLayout;
 import java.util.Properties;
 
@@ -7,6 +9,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+
+import app.adc.genericViewer.ui.IConstant.MariaDBConstants;
 
 public class MariaDB extends JPanel implements RemoteService {
 
@@ -22,7 +26,7 @@ public class MariaDB extends JPanel implements RemoteService {
 	private void init() {
 		setLayout(new GridLayout(4, 2));
 		
-		txtHostname = new JTextField();
+		txtHostname = new JTextField("localhost");
 		txtHostname.setToolTipText("Provide host name here");
 		txtHostname.setColumns(25);
 		
@@ -30,7 +34,7 @@ public class MariaDB extends JPanel implements RemoteService {
 		txtPortNumber.setToolTipText("Provide port number here");
 		txtPortNumber.setColumns(25);
 		
-		txtUserName = new JTextField();
+		txtUserName = new JTextField("root");
 		txtUserName.setToolTipText("Provide username here");
 		txtUserName.setColumns(25);
 		
@@ -56,8 +60,18 @@ public class MariaDB extends JPanel implements RemoteService {
 	}
 
 	public Properties getProperties() {
-		// TODO Auto-generated method stub
-		return null;
+		Properties props = new Properties();
+		
+		props.put(MariaDBConstants.DBHost.getText(), txtHostname.getText());
+		props.put(MariaDBConstants.DBPort.getText(), txtPortNumber.getText());
+		props.put(MariaDBConstants.Username.getText(), txtUserName.getText());
+		if(txtPassword.getText() != null && txtPassword.getText().trim().length() >= 1) {
+			props.put(MariaDBConstants.Password.getText(), txtPassword.getText());
+		}else {
+			props.remove(MariaDBConstants.Password.getText());
+		}
+		
+		return props;
 	}
 
 	public String getDisplayText() {
@@ -71,6 +85,10 @@ public class MariaDB extends JPanel implements RemoteService {
 
 	public AbstractViewer getViewer() {
 		return new SQLViewer(null, getProperties());
+	}
+
+	public String getTitleText() {
+		return txtHostname.getText();
 	}
 
 }

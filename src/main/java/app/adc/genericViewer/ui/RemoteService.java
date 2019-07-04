@@ -19,4 +19,6 @@ public interface RemoteService {
 	String toString();
 	
 	AbstractViewer getViewer();
+	
+	String getTitleText();
 }

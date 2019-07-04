@@ -1,6 +1,7 @@
 package app.adc.genericViewer.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -39,7 +40,7 @@ public class RemoteOptions extends JPanel {
 		btnConnect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent a_event) {
 				((JDialog)SwingUtilities.getRoot(RemoteOptions.this)).dispose();
-				MenuEventListener.openResource(services[remoteServiceLists.getSelectedIndex()].getViewer(), "Hello");
+				MenuEventListener.openResource(services[remoteServiceLists.getSelectedIndex()].getViewer(), services[remoteServiceLists.getSelectedIndex()].getTitleText());
 			}
 		});
 
@@ -71,6 +72,7 @@ public class RemoteOptions extends JPanel {
 				configPanel.add(new JScrollPane(services[a_event.getFirstIndex()].getConfigUI(null)));
 			}
 		});
+		remoteServiceLists.setPreferredSize(new Dimension(150, 100));
 
 		JPanel		pnlButton		= new JPanel();
 
