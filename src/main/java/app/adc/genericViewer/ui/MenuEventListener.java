@@ -43,13 +43,17 @@ public final class MenuEventListener {
 			return;
 		}
 		
+		int WIDTH = (MainContainer.getMainContainer().getDesktopPane().getWidth() / 100) * 85, 
+				HEIGHT = (MainContainer.getMainContainer().getDesktopPane().getHeight() / 100) * 85;
+		
 		JInternalFrame frm = new JInternalFrame(displayName);
 		frm.setName(frm.getTitle());
 		frm.setToolTipText(frm.getTitle());
 		
 		frm.add(viewer);
-		frm.setLocation(0, 0);
-		frm.setSize(800, 600);
+		frm.setLocation((MainContainer.getMainContainer().getDesktopPane().getWidth() / 2) - (WIDTH / 2), 
+				(MainContainer.getMainContainer().getDesktopPane().getHeight() / 2) - (HEIGHT / 2));
+		frm.setSize(WIDTH, HEIGHT);
 		frm.setClosable(true);
 		frm.setResizable(true);
 		frm.setIconifiable(true);
