@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -34,7 +35,7 @@ public class ZipViewer extends AbstractViewer {
 
 	private URI					sourceFile	= null;
 	private JTable				tblZip		= null;
-	private List<ZipEntry>		filesList	= null;
+	private List<ZipNode>		filesList	= null;
 	private ZipEntryTableModel	tblModel	= null;
 	private SimpleDateFormat	dateFormat	= null;
 
@@ -52,7 +53,7 @@ public class ZipViewer extends AbstractViewer {
 	}
 
 	private void init() {
-		filesList	= new ArrayList<ZipEntry>();
+		filesList	= new ArrayList<ZipNode>();
 		tblZip		= new JTable(tblModel = new ZipEntryTableModel());
 		tblZip.getColumnModel().getColumn(0).setCellRenderer(new ImageRenderer());
 		tblZip.getColumnModel().getColumn(2).setCellRenderer(new NumberTableCellRenderer());
@@ -78,18 +79,33 @@ public class ZipViewer extends AbstractViewer {
 		
 		tblZip.addMouseListener(new MouseAdapter() {
 		    public void mousePressed(MouseEvent mouseEvent) {
-		        JTable table =(JTable) mouseEvent.getSource();
+		    	JTable table =(JTable) mouseEvent.getSource();
+		    	
+		    	if(mouseEvent.getClickCount() < 2 || table.getSelectedRow() < 0) {
+		    		return;
+		    	}
+		    	
+		        
 		        Point point = mouseEvent.getPoint();
 		        int row = table.rowAtPoint(point);
+		        
 		        if(filesList.get(row).isDirectory()) {
-		        	return;
-		        }
-		        if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
-		        	File f = new File(System.getProperty("java.io.tmpdir") + File.separatorChar + UUID.randomUUID().toString() + "_" + getName(filesList.get(row)));
+		        	if(level == 0) {
+		        		level++;
+		        	}else {
+		        		if(row == 0) {
+		        			level--;
+		        		}else {
+		        			level++;
+		        		}
+		        	}
+		        	loadZipNode(filesList.get(row));
+		        }else {
+		        	File f = new File(System.getProperty("java.io.tmpdir") + File.separatorChar + UUID.randomUUID().toString() + "_" + getName(filesList.get(row).getEntry()));
 		        	
 		        	try {
 		        		ZipFile	zipFile	= new ZipFile(new File(sourceFile));
-			        	InputStream inputStream = zipFile.getInputStream(filesList.get(row));
+			        	InputStream inputStream = zipFile.getInputStream(filesList.get(row).getEntry());
 			        	
 			        	FileOutputStream outputStream = new FileOutputStream(f);
 			        	int data = inputStream.read();
@@ -110,24 +126,33 @@ public class ZipViewer extends AbstractViewer {
 		    }
 		});
 	}
+	int level = 0;
+	private void loadZipNode(ZipNode zNode) {
+		
+		if(zNode == null) {
+			return;
+		}
+		
+		filesList.clear();
+		
+		if(level > 0) {
+			filesList.add(zNode.getParent());
+		}
+		
+		
+		for(Entry<String, ZipNode> entry : zNode.getChildren().entrySet()) {
+			filesList.add(entry.getValue());
+		}
+		
+		tblModel.fireTableDataChanged();
+	}
 
 	private void loadFile() throws Throwable {
-		ZipFile zipFile	= new ZipFile(new File(sourceFile));
+		ZipFile	zipFile	= new ZipFile(new File(sourceFile));
 
-		Enumeration<? extends ZipEntry>	e		= zipFile.entries();
-		filesList.clear();
-		while (e.hasMoreElements()) {
-
-			ZipEntry entry = e.nextElement();
-			
-			
-			// get the name of the entry
-			String entryName = entry.getName();
-			System.out.println("ZIP Entry: " + entryName);
-			
-			filesList.add(entry);
-
-		}
+		ZipNode zNode = ZipNode.fromZipFile(zipFile);
+		loadZipNode(zNode);
+		
 		tblModel.fireTableDataChanged();
 	}
 
@@ -205,21 +230,27 @@ public class ZipViewer extends AbstractViewer {
 					}
 					// return filesList.get(row).isDirectory();
 				case 1:
-					return getName(filesList.get(row));
+					if(row == 0 && level > 0) {
+						return "..";
+					}
+					return getName(filesList.get(row).getEntry());
 				case 2:
 					if (filesList.get(row).isDirectory()) {
 						return "";
 					} else {
-						return filesList.get(row).getSize();
+						return filesList.get(row).getEntry().getSize();
 					}
 				case 3:
 					if (filesList.get(row).isDirectory()) {
 						return "";
 					} else {
-						return filesList.get(row).getCompressedSize();
+						return filesList.get(row).getEntry().getCompressedSize();
 					}
 				case 4:
-					return dateFormat.format(new Date(filesList.get(row).getLastModifiedTime().toMillis()));
+					if(row == 0 && level > 0) {
+						return "";
+					}
+					return dateFormat.format(new Date(filesList.get(row).getEntry().getLastModifiedTime().toMillis()));
 
 			}
 
