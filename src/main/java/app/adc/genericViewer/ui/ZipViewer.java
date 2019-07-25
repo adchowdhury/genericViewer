@@ -199,9 +199,9 @@ public class ZipViewer extends AbstractViewer {
 			switch (column) {
 				case 0:
 					if (filesList.get(row).isDirectory()) {
-						return new ImageIcon(getClass().getResource("/app/adc/genericViewer/icons/folder.png"));
+						return IConstant.FolderIcon;
 					} else {
-						return new ImageIcon(getClass().getResource("/app/adc/genericViewer/icons/file.png"));
+						return IConstant.FileIcon;
 					}
 					// return filesList.get(row).isDirectory();
 				case 1:

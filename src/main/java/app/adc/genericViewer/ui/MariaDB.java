@@ -6,6 +6,7 @@ import java.awt.GridLayout;
 import java.util.Properties;
 
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -61,6 +62,24 @@ public class MariaDB extends JPanel implements RemoteService {
 
 	public Properties getProperties() {
 		Properties props = new Properties();
+		
+		if(txtHostname.getText().trim().length() < 1) {
+			JOptionPane.showMessageDialog(null, "Please enter hostname");
+			txtHostname.transferFocus();
+			throw new RuntimeException("Hostname not provided");
+		}
+		
+		if(txtPortNumber.getText().trim().length() < 1) {
+			JOptionPane.showMessageDialog(null, "Please enter port");
+			txtPortNumber.transferFocus();
+			throw new RuntimeException("Port not provided");
+		}
+		
+		if(txtUserName.getText().trim().length() < 1) {
+			JOptionPane.showMessageDialog(null, "Please enter username");
+			txtUserName.transferFocus();
+			throw new RuntimeException("Username not provided");
+		}
 		
 		props.put(MariaDBConstants.DBHost.getText(), txtHostname.getText());
 		props.put(MariaDBConstants.DBPort.getText(), txtPortNumber.getText());

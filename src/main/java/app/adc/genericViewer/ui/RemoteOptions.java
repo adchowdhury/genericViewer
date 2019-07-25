@@ -23,7 +23,7 @@ public class RemoteOptions extends JPanel {
 	private JPanel							configPanel			= null;
 	private JButton							btnConnect			= null;
 	private JButton							btnCancel			= null;
-	private final static RemoteService[]	services			= { new MariaDB() };
+	private final static RemoteService[]	services			= { new MariaDB(), new FTPService(), new SVNViewerService() };
 
 	public RemoteOptions() {
 		init();
@@ -39,8 +39,8 @@ public class RemoteOptions extends JPanel {
 		
 		btnConnect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent a_event) {
-				((JDialog)SwingUtilities.getRoot(RemoteOptions.this)).dispose();
 				MenuEventListener.openResource(services[remoteServiceLists.getSelectedIndex()].getViewer(), services[remoteServiceLists.getSelectedIndex()].getTitleText());
+				((JDialog)SwingUtilities.getRoot(RemoteOptions.this)).dispose();
 			}
 		});
 
@@ -68,8 +68,14 @@ public class RemoteOptions extends JPanel {
 		
 		remoteServiceLists.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent a_event) {
+				if(a_event.getValueIsAdjusting()) {
+					return;
+				}
+				System.out.println("RemoteOptions.init().new ListSelectionListener() {...}.valueChanged() " + services[remoteServiceLists.getSelectedIndex()].getDisplayText());
 				configPanel.removeAll();
-				configPanel.add(new JScrollPane(services[a_event.getFirstIndex()].getConfigUI(null)));
+				configPanel.add(new JScrollPane(services[remoteServiceLists.getSelectedIndex()].getConfigUI(null)));
+				configPanel.invalidate();
+				configPanel.repaint();
 			}
 		});
 		remoteServiceLists.setPreferredSize(new Dimension(150, 100));
