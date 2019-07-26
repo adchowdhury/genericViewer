@@ -20,6 +20,7 @@ import java.util.Properties;
 import java.util.Vector;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -52,6 +53,8 @@ public class SQLViewer extends AbstractViewer {
 
 	private DBResultTableModel	tableModel		= null;
 
+	private JComboBox<String>	dbList			= null;
+
 	public SQLViewer(URI source, Properties a_props) {
 		super(source);
 		props = a_props;
@@ -72,12 +75,24 @@ public class SQLViewer extends AbstractViewer {
 		resultComment	= new JTextArea();
 		tb				= new JToolBar();
 		execute			= new JButton("Execute");
+		dbList = new JComboBox<String>();
+		
+		
+		tb.add(dbList);
 		tb.add(execute);
 		execute.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent a_action) {
 				executeQuery();
 			}
 		});
+		
+		dbList.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent a_action) {
+				System.out.println("SQLViewer.init().new ActionListener() {...}.actionPerformed()");
+			}
+		});
+		
+		
 		execute.setFocusable(false);
 		
 		JTabbedPane resultTab = new JTabbedPane();
@@ -116,6 +131,14 @@ public class SQLViewer extends AbstractViewer {
 				resultComment.append("No query");
 				return;
 			}
+			
+			if(dbList.getSelectedIndex() < 0) {
+				resultComment.append("No DB selected");
+				return;
+			}
+			
+			conn.setCatalog(dbList.getSelectedItem().toString());
+			
 			Statement			stmt	= conn.createStatement();
 			ResultSet			rs		= stmt.executeQuery(strSQLQuery);
 			ResultSetMetaData	rsmd	= rs.getMetaData();
@@ -197,7 +220,7 @@ public class SQLViewer extends AbstractViewer {
 			if (props.getProperty(MariaDBConstants.Password.getText()) == null) {
 				conn = DriverManager
 						.getConnection("jdbc:mariadb://" + props.getProperty(MariaDBConstants.DBHost.getText()) + ":"
-								+ props.getProperty(MariaDBConstants.DBPort.getText()) + "/ptm?user="
+								+ props.getProperty(MariaDBConstants.DBPort.getText()) + "?user="
 								+ props.getProperty(MariaDBConstants.Username.getText()));
 			} else {
 				conn = DriverManager.getConnection(
@@ -266,6 +289,9 @@ public class SQLViewer extends AbstractViewer {
 
 			for (int i = 1; i <= c; i++) {
 				System.out.println(rsmd.getColumnLabel(i) + " - " + rs.getObject(i));
+			}
+			if("TABLE_CAT".equalsIgnoreCase(displayColumnName)) {
+				dbList.addItem(rs.getString(displayColumnName));
 			}
 			System.out.println("==========");
 		}
