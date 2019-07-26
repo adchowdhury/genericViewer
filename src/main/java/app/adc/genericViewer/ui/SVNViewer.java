@@ -211,7 +211,7 @@ public class SVNViewer extends AbstractViewer {
 			 logTableModel.clearAll();
 			 for (Iterator entries = logEntries.iterator(); entries.hasNext();) {
 				 SVNLogEntry logEntry = (SVNLogEntry) entries.next();
-				 logTableModel.addRowData(logEntry);
+				 logTableModel.addRowData(0, logEntry);
 			 }
 			 logTableModel.fireTableDataChanged();
 		} catch (Throwable a_th) {
@@ -254,11 +254,15 @@ public class SVNViewer extends AbstractViewer {
 	
 
 	class LogTableModel extends DefaultTableModel{
-		private String[] columns	= new String[] { "Revision", "Author",  "Date", "Comment" };
+		private String[]			columns	= new String[] { "Revision", "Author", "Date", "Comment" };
 		private List<SVNLogEntry>	data	= new ArrayList<SVNLogEntry>();
 		
 		public void clearAll() {
 			data.clear();
+		}
+		
+		public void addRowData(int a_index, SVNLogEntry a_svnLog) {
+			data.add(a_index, a_svnLog);
 		}
 		
 		public void addRowData(SVNLogEntry a_svnLog) {
