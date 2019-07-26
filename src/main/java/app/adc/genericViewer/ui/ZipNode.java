@@ -93,6 +93,11 @@ public class ZipNode {
 	 * a string representation of this ZipNode.
 	 */
 	public String toString() {
+		
+		if(entry == null) {
+			return "[root]";
+		}
+		
 		try {
 			return "ZipNode [" + entry.getName() + "] in [" + file.getName() + "]";
 		} catch (Throwable a_th) {

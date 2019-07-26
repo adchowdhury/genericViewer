@@ -14,7 +14,6 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -152,7 +151,7 @@ public class ZipViewer extends AbstractViewer {
 
 		ZipNode zNode = ZipNode.fromZipFile(zipFile);
 		loadZipNode(zNode);
-		
+		System.out.println("ZipViewer.loadFile()");
 		tblModel.fireTableDataChanged();
 	}
 
