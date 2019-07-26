@@ -24,19 +24,19 @@ public class SVNViewerService extends JPanel implements RemoteService {
 	private void init() {
 		setLayout(new GridLayout(4, 2));
 		
-		txtHostName = new JTextField("Trigyn website");
+		txtHostName = new JTextField("");
 		txtHostName.setToolTipText("Provide host name here");
 		txtHostName.setColumns(25);
 
-		txtHostURL = new JTextField("https://192.168.102.58/svn/drupal");
+		txtHostURL = new JTextField("");
 		txtHostURL.setToolTipText("Provide host URL here");
 		txtHostURL.setColumns(25);
 		
-		txtUserName = new JTextField("aniruddha.chowdhury");
+		txtUserName = new JTextField("......");
 		txtUserName.setToolTipText("Provide username here");
 		txtUserName.setColumns(25);
 		
-		txtPassword = new JPasswordField("q1w2E#R$");
+		txtPassword = new JPasswordField("......");
 		txtPassword.setToolTipText("Provide password here");
 		txtPassword.setColumns(25);
 		
